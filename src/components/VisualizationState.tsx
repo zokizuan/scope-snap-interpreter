@@ -3,7 +3,9 @@ import { useInterpreter } from "@/context/InterpreterContext";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { Badge } from "@/components/ui/badge";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { cn } from "@/lib/utils";
+import { Link } from "lucide-react";
 
 const VisualizationState = () => {
   const { 
@@ -44,11 +46,25 @@ const VisualizationState = () => {
                             {frame.lineNumber && ` @ line ${frame.lineNumber}`}
                           </span>
                         </div>
-                        {frame.type && (
-                          <Badge variant={frame.type === "closure" ? "outline" : "default"} className="text-xs">
-                            {frame.type}
-                          </Badge>
-                        )}
+                        <div className="flex items-center space-x-2">
+                          {frame.type && (
+                            <TooltipProvider>
+                              <Tooltip>
+                                <TooltipTrigger asChild>
+                                  <Badge variant={frame.type === "closure" ? "outline" : "default"} className="text-xs">
+                                    {frame.type}
+                                    {frame.type === "closure" && <Link className="h-3 w-3 ml-1" />}
+                                  </Badge>
+                                </TooltipTrigger>
+                                <TooltipContent>
+                                  {frame.type === "closure" 
+                                    ? "This function accesses variables from its outer scope via closure" 
+                                    : "Regular function call"}
+                                </TooltipContent>
+                              </Tooltip>
+                            </TooltipProvider>
+                          )}
+                        </div>
                       </div>
                     ))}
                   </div>
@@ -72,11 +88,21 @@ const VisualizationState = () => {
                       )}>
                         {scope.name}
                         {scope.type === "closure" && (
-                          <span className="ml-2 text-xs">
-                            <Badge variant="outline" className="border-amber-300 text-amber-700">
-                              Persists 🔗
-                            </Badge>
-                          </span>
+                          <TooltipProvider>
+                            <Tooltip>
+                              <TooltipTrigger asChild>
+                                <span className="ml-2">
+                                  <Badge variant="outline" className="border-amber-300 text-amber-700 flex items-center gap-1">
+                                    <Link className="h-3.5 w-3.5" />
+                                    Persists
+                                  </Badge>
+                                </span>
+                              </TooltipTrigger>
+                              <TooltipContent>
+                                <p>This scope persists due to closure, even though its function has returned</p>
+                              </TooltipContent>
+                            </Tooltip>
+                          </TooltipProvider>
                         )}
                       </h4>
                     </div>
@@ -96,8 +122,19 @@ const VisualizationState = () => {
                               )}
                             >
                               <div className="flex items-center">
+                                {variable.isClosure && (
+                                  <TooltipProvider>
+                                    <Tooltip>
+                                      <TooltipTrigger asChild>
+                                        <span className="mr-1 text-amber-600"><Link className="h-3.5 w-3.5" /></span>
+                                      </TooltipTrigger>
+                                      <TooltipContent>
+                                        <p>Accessed via closure</p>
+                                      </TooltipContent>
+                                    </Tooltip>
+                                  </TooltipProvider>
+                                )}
                                 <span className="text-sm">
-                                  {variable.isClosure && "🔗 "}
                                   {varName}:
                                 </span>
                               </div>
@@ -108,6 +145,16 @@ const VisualizationState = () => {
                               </div>
                             </div>
                           ))}
+                          
+                          {/* Special this binding if in function scope */}
+                          {scope.type === "function" && (
+                            <div className="flex justify-between py-1 px-2 rounded text-gray-500">
+                              <span className="text-sm">this:</span>
+                              <div className="text-sm font-mono bg-slate-50 px-1.5 py-0.5 rounded">
+                                [Window Object]
+                              </div>
+                            </div>
+                          )}
                         </div>
                       )}
                     </div>

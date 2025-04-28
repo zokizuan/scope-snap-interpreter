@@ -85,5 +85,54 @@ const functions = createFunctions();
 functions[0](); // 3
 functions[1](); // 3
 functions[2](); // 3`
+  },
+  {
+    name: "Loop with Let (Block Scope)",
+    code: `function createFunctionsWithLet() {
+  const funcs = [];
+  
+  for (let i = 0; i < 3; i++) {
+    funcs.push(function() {
+      console.log(i);
+    });
+  }
+  
+  return funcs;
+}
+
+const functionsWithLet = createFunctionsWithLet();
+functionsWithLet[0](); // 0
+functionsWithLet[1](); // 1
+functionsWithLet[2](); // 2`
+  },
+  {
+    name: "Private Counter Module",
+    code: `const createPrivateCounter = () => {
+  // Private state
+  let count = 0;
+  
+  // Public interface
+  return {
+    increment() {
+      count += 1;
+      return count;
+    },
+    decrement() {
+      count -= 1;
+      return count;
+    },
+    getValue() {
+      return count;
+    }
+  };
+};
+
+const counter1 = createPrivateCounter();
+const counter2 = createPrivateCounter();
+
+console.log(counter1.increment()); // 1
+console.log(counter1.increment()); // 2
+console.log(counter2.increment()); // 1 (separate instance)
+console.log(counter1.getValue());  // 2`
   }
 ];

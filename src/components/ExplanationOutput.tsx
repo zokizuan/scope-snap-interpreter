@@ -2,21 +2,28 @@
 import { useInterpreter } from "@/context/InterpreterContext";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Badge } from "@/components/ui/badge";
 
 const ExplanationOutput = () => {
   const { 
     currentStepExplanation, 
     consoleOutput,
     currentStep,
-    totalSteps
+    totalSteps,
+    highlightedLine
   } = useInterpreter();
 
   return (
     <Card>
       <CardHeader className="bg-slate-50 py-3 px-4 border-b flex justify-between items-center">
         <CardTitle className="text-base">Explanation / Output</CardTitle>
-        <div className="text-sm text-gray-500">
-          Step {currentStep}/{totalSteps}
+        <div className="flex items-center space-x-2">
+          <Badge variant="outline" className="text-xs">
+            Line {highlightedLine}
+          </Badge>
+          <div className="text-sm text-gray-500">
+            Step {currentStep}/{totalSteps}
+          </div>
         </div>
       </CardHeader>
       <CardContent className="p-0">
@@ -41,7 +48,22 @@ const ExplanationOutput = () => {
           <TabsContent value="explanation" className="p-0 m-0">
             <div className="p-4 text-sm">
               {currentStepExplanation ? (
-                <p>{currentStepExplanation}</p>
+                <div className="space-y-2">
+                  <div className="font-medium">Step {currentStep}/{totalSteps}: Executing line {highlightedLine}</div>
+                  <p>{currentStepExplanation}</p>
+                  
+                  {/* Additional explanations for closures when relevant */}
+                  {currentStepExplanation.includes("closure") && (
+                    <div className="mt-3 p-3 bg-amber-50 border border-amber-200 rounded-md">
+                      <h4 className="font-medium text-amber-800 mb-1">Closure Explained</h4>
+                      <p className="text-amber-700 text-xs">
+                        A closure is formed when a function accesses variables from its outer (enclosing) scope,
+                        even after the outer function has returned. This creates a persistent link to those variables,
+                        keeping them alive in memory.
+                      </p>
+                    </div>
+                  )}
+                </div>
               ) : (
                 <p className="text-gray-500">No explanation for current step.</p>
               )}
